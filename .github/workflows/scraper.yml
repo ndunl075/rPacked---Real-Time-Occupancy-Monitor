@@ -1,0 +1,64 @@
+name: Run RPAC Scraper
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget gnupg ca-certificates
+        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+        # Install Chrome dependencies
+        sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Create Firebase service account key
+      env:
+        FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      run: |
+        echo "$FIREBASE_SERVICE_ACCOUNT" > serviceAccountKey.json
+        echo "Service account key file created"
+        ls -lh serviceAccountKey.json
+    
+    - name: Verify service account key
+      run: |
+        if [ ! -s serviceAccountKey.json ]; then
+          echo "ERROR: serviceAccountKey.json is empty or does not exist!"
+          exit 1
+        fi
+        echo "Service account key file size: $(wc -c < serviceAccountKey.json) bytes"
+        # Verify it's valid JSON
+        python3 -m json.tool serviceAccountKey.json > /dev/null || (echo "ERROR: serviceAccountKey.json is not valid JSON!" && exit 1)
+        echo "✓ Service account key is valid JSON"
+    
+    - name: Run scraper
+      run: |
+        python scraper.py
+    
+    - name: Cleanup
+      if: always()
+      run: |
+        rm -f serviceAccountKey.json

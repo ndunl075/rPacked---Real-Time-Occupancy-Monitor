@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isVerifiedUser() {
+      return request.auth != null;
+    }
+
+    // Match block for app_metadata collection
+    match /app_metadata/{document} {
+      // Allow read for any authenticated user
+      allow read: if isVerifiedUser();
+      
+      // Allow write only from admin/service account (set to false for now)
+      // This will be updated when configuring GitHub Action
+      allow write: if false;
+    }
+    
+    // Match block for live_counts collection (existing data)
+    match /live_counts/{document} {
+      allow read: if isVerifiedUser();
+      allow write: if false; // Only admin/service account can write
+    }
+  }
+}

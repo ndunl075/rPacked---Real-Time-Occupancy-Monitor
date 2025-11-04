@@ -1,0 +1,4 @@
+selenium
+firebase-admin
+beautifulsoup4
+webdriver-manager

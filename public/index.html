@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rPacked - Live RPAC Capacity | Ohio State</title>
+    
+    <!-- === NEW FAVICON === -->
+    <!-- This is an inline SVG favicon. It creates the scarlet "O" for your browser tab. -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23BB0000'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='70' font-weight='bold' fill='white' font-family='Arial, sans-serif'%3EO%3C/text%3E%3C/svg%3E">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Using Inter font from Tailwind's default stack */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        /* Ohio State colors */
+        :root {
+            --osu-scarlet: #BB0000;
+            --osu-gray: #666666;
+            --osu-light-gray: #E5E5E5;
+        }
+        /* Custom styles for the progress bar background */
+        .progress-bar-bg {
+            background-color: var(--osu-light-gray); /* Ohio State light gray */
+        }
+        .osu-scarlet {
+            background-color: var(--osu-scarlet);
+        }
+        .osu-scarlet-text {
+            color: var(--osu-scarlet);
+        }
+        .osu-gray-text {
+            color: var(--osu-gray);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen" style="background-color: #F5F5F5;">
+
+    <!-- Header -->
+    <header class="shadow-md" style="background-color: #BB0000;">
+        <div class="container mx-auto max-w-5xl px-4 py-5">
+            <div class="flex justify-between items-center">
+                <div>
+                    <!-- === MOBILE-FRIENDLY HEADER TEXT === -->
+                    <h1 class="text-2xl sm:text-3xl font-bold text-white">rPacked</h1>
+                    <p class="text-sm text-white opacity-90">Ohio State University RPAC</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs sm:text-sm text-white">Live RPAC Capacity</p>
+                    <p id="last-updated" class="text-xs text-white opacity-80">Updating...</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto max-w-5xl p-4" id="app-container">
+        
+        <!-- Loading State -->
+        <div id="message-container" class="text-center p-10">
+            <p id="message-text" class="text-lg text-gray-500">Connecting to live data...</p>
+        </div>
+
+        <!-- 
+          === MOBILE-FRIENDLY GRID ===
+          This class setup is perfect for mobile.
+          'grid-cols-1' = 1 column by default (on phones)
+          'md:grid-cols-2' = 2 columns on medium screens (tablets)
+          'lg:grid-cols-3' = 3 columns on large screens (desktops)
+        -->
+        <div id="capacity-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Location cards will be injected here by JavaScript -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="container mx-auto max-w-5xl px-4 py-6 text-center">
+        <p class="text-sm text-gray-600">Created by Nico Dunlap</p>
+    </footer>
+
+    <!-- HTML Template for a single location card -->
+    <template id="location-card-template">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300">
+            <div class="p-5">
+                <h2 class="text-lg font-semibold text-gray-800 truncate" data-name>Location Name</h2>
+                
+                <!-- Status Tag -->
+                <div class="mt-2 mb-3">
+                    <span data-status-tag class="px-3 py-1 rounded-full text-sm font-medium"></span>
+                </div>
+
+                <!-- Availability Text -->
+                <div class="mb-2">
+                    <span class="text-3xl font-bold text-gray-900" data-available-count>--</span>
+                    <span class="text-lg font-medium text-gray-600" data-available-label>/ -- AVAILABLE</span>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full progress-bar-bg rounded-full h-4 overflow-hidden">
+                    <div data-progress-bar class="h-4 rounded-full transition-all duration-500"></div>
+                </div>
+
+                <!-- Raw Count (sub-text) -->
+                <p class="text-right text-sm text-gray-500 mt-2" data-raw-count>-- / --</p>
+            </div>
+        </div>
+    </template>
+
+    <!-- Firebase and App Logic -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
+        /*
+         * === !!! NEW FIREBASE CONFIG !!! ===
+         * This is the new, valid config you just generated by
+         * re-creating the app in the Firebase console.
+         * This should finally fix the 'api-key-not-valid' error.
+         */
+        const firebaseConfig = {
+          apiKey: "AIzaSyA2kA0Al3xt8k2VJhPPw9HNWmOHbyhxRP0",
+          authDomain: "rpacked-fd51e.firebaseapp.com",
+          projectId: "rpacked-fd51e",
+          storageBucket: "rpacked-fd51e.firebasestorage.app",
+          messagingSenderId: "45513384003",
+          appId: "1:45513384003:web:bcc58dbac9cb81d81b74f6",
+          measurementId: "G-85G77S14XG"
+        };
+        // ----------------------------------------
+
+        // Get DOM elements
+        const grid = document.getElementById('capacity-grid');
+        const template = document.getElementById('location-card-template');
+        const messageContainer = document.getElementById('message-container');
+        const messageText = document.getElementById('message-text');
+        const lastUpdatedEl = document.getElementById('last-updated');
+
+        /**
+         * Renders a single location card with the new design.
+         */
+        function renderCapacityCard(location) {
+            const card = template.content.cloneNode(true).firstElementChild;
+
+            // --- Get all the data elements from the template ---
+            const nameEl = card.querySelector('[data-name]');
+            const statusTag = card.querySelector('[data-status-tag]');
+            const availableCountEl = card.querySelector('[data-available-count]');
+            const availableLabelEl = card.querySelector('[data-available-label]');
+            const progressBar = card.querySelector('[data-progress-bar]');
+            const rawCountEl = card.querySelector('[data-raw-count]');
+            
+            // --- Set basic info ---
+            nameEl.textContent = location.name;
+            rawCountEl.textContent = `${location.current} / ${location.total}`;
+
+            // --- Calculate availability ---
+            const current = location.current || 0;
+            const total = location.total || 0;
+            const available = Math.max(0, total - current);
+            let percentUsed = 0;
+            if (total > 0) {
+                percentUsed = (current / total) * 100;
+            }
+
+            // --- 1. Set Status Tag (Open/Closed) ---
+            const isOpen = location.openStatus === 'Open';
+            if (isOpen) {
+                statusTag.textContent = "OPEN";
+                statusTag.style.backgroundColor = '#D1FAE5'; // Light green background
+                statusTag.style.color = '#065F46'; // Dark green text
+            } else {
+                statusTag.textContent = "CLOSED";
+                statusTag.style.backgroundColor = '#FEE2E2'; // Light red background
+                statusTag.style.color = '#991B1B'; // Dark red text
+            }
+
+            // --- 2. Set Availability Text ---
+            availableCountEl.textContent = available;
+            availableLabelEl.textContent = `/ ${total} AVAILABLE`;
+            
+            // If closed, dim the text
+            if (!isOpen) {
+                availableCountEl.classList.add('text-gray-400');
+                availableLabelEl.classList.add('text-gray-400');
+            }
+
+            // --- 3. Set Progress Bar Color & Width ---
+            progressBar.style.width = `${percentUsed}%`;
+            
+            if (!isOpen) {
+                progressBar.style.backgroundColor = '#666666'; // Ohio State gray for closed
+            } else if (percentUsed < 50) {
+                progressBar.style.backgroundColor = '#E8A5A5'; // Light scarlet for not busy
+            } else if (percentUsed < 85) {
+                progressBar.style.backgroundColor = '#BB0000'; // Ohio State scarlet for busy
+            } else {
+                progressBar.style.backgroundColor = '#8B0000'; // Dark scarlet for packed
+            }
+
+            return card;
+        }
+
+        /**
+         * Main function to initialize and run the app.
+         */
+        async function initialize() {
+            try {
+                // Initialize Firebase
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+                
+                // Sign in anonymously
+                await signInAnonymously(auth);
+                const userId = auth.currentUser ? auth.currentUser.uid : 'unknown';
+                
+                if (!auth.currentUser) {
+                    throw new Error("Could not authenticate with database.");
+                }
+
+                // --- This is the REAL-TIME LISTENER ---
+                const docRef = doc(db, "live_counts", "RPAC");
+                
+                onSnapshot(docRef, (doc) => {
+                    messageContainer.style.display = 'none'; // Hide "Connecting..."
+                    grid.innerHTML = ''; // Clear old data
+
+                    if (doc.exists()) {
+                        const data = doc.data();
+                        const locations = data.locations || [];
+                        
+                        // Sort locations alphabetically by name
+                        locations.sort((a, b) => a.name.localeCompare(b.name));
+
+                        // Render a card for each location
+                        locations.forEach(location => {
+                            const card = renderCapacityCard(location);
+                            grid.appendChild(card);
+                        });
+
+                        // Update last updated timestamp
+                        const serverTime = data.last_updated ? data.last_updated.toDate() : new Date();
+                        lastUpdatedEl.textContent = `Last Scrape: ${serverTime.toLocaleTimeString()}`;
+
+                    } else {
+                        // Document doesn't exist
+                        messageText.textContent = "Data not found. Please run the 'scraper.py' script.";
+                        messageContainer.style.display = 'block';
+                    }
+                }, (error) => {
+                    // Handle snapshot errors
+                    console.error("Snapshot error:", error);
+                    messageText.textContent = "Error: Could not connect to the database. Check security rules and network connection.";
+                    messageContainer.style.display = 'block';
+                });
+
+            } catch (err) {
+                console.error("Initialization Error:", err);
+                messageText.textContent = `Error: ${err.message}`;
+                messageContainer.style.display = 'block';
+            }
+        }
+
+        // Run the app
+        initialize();
+    </script>
+
+</body>
+</html>
+

@@ -19,23 +19,27 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Install Chrome
+    - name: Install Chrome/Chromium
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget gnupg ca-certificates
+        # Try to install Google Chrome first
+        wget -q -O /tmp/google-chrome-stable_current_amd64.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb || true
+        if [ -f /tmp/google-chrome-stable_current_amd64.deb ]; then
+          sudo apt-get install -y /tmp/google-chrome-stable_current_amd64.deb || true
+        fi
         
-        # Modern method to add Google Chrome repository (apt-key is deprecated)
-        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg
-        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list > /dev/null
+        # If Chrome failed, use Chromium (available in Ubuntu repos)
+        if ! command -v google-chrome &> /dev/null; then
+          echo "Installing Chromium as fallback..."
+          sudo apt-get install -y chromium-browser chromium-chromedriver
+        fi
         
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
-        # Install Chrome dependencies
-        sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2
+        # Install required dependencies
+        sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 libxss1 libgtk-3-0
         
-        # Verify Chrome installation
-        google-chrome --version || (echo "ERROR: Chrome installation failed!" && exit 1)
-        echo "✓ Chrome installed successfully"
+        # Verify installation
+        google-chrome --version || chromium --version || (echo "ERROR: Neither Chrome nor Chromium installed!" && exit 1)
+        echo "✓ Browser installed successfully"
     
     - name: Install Python dependencies
       run: |

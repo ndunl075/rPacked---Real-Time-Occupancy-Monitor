@@ -68,6 +68,17 @@ def scrape_rpac_data():
     success = False
     try:
         print("Initializing Chrome browser driver...")
+        # Try to find Chrome binary (works with both Chrome and Chromium)
+        import shutil
+        chrome_binary = None
+        for binary_name in ['google-chrome', 'chromium-browser', 'chromium', 'chrome']:
+            chrome_path = shutil.which(binary_name)
+            if chrome_path:
+                chrome_binary = chrome_path
+                print(f"Found browser binary: {chrome_binary}")
+                options.binary_location = chrome_binary
+                break
+        
         service = ChromeService(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=options)
         print("✓ Chrome driver initialized.")

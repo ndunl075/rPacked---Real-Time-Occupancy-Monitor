@@ -50,9 +50,15 @@ jobs:
       env:
         FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
       run: |
+        if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+          echo "ERROR: FIREBASE_SERVICE_ACCOUNT secret is empty or not set!"
+          echo "Please go to Settings > Secrets > Actions and add/update the FIREBASE_SERVICE_ACCOUNT secret."
+          exit 1
+        fi
         echo "$FIREBASE_SERVICE_ACCOUNT" > serviceAccountKey.json
         echo "Service account key file created"
         ls -lh serviceAccountKey.json
+        echo "File size: $(wc -c < serviceAccountKey.json) bytes"
     
     - name: Verify service account key
       run: |

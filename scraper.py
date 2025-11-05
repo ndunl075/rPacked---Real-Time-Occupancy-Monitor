@@ -214,7 +214,16 @@ def scrape_rpac_data():
 
 # --- Run the scraper ---
 if __name__ == "__main__":
-    scrape_rpac_data()
-    print("\n✓ Scraper completed successfully!")
-    sys.exit(0)
+    try:
+        scrape_rpac_data()
+        print("\n✓ Scraper completed successfully!")
+        sys.exit(0)
+    except KeyboardInterrupt:
+        print("\n!!! Scraper interrupted by user")
+        sys.exit(130)
+    except Exception as e:
+        print(f"\n!!! FATAL ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 

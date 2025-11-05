@@ -23,12 +23,19 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y wget gnupg ca-certificates
-        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-        sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+        
+        # Modern method to add Google Chrome repository (apt-key is deprecated)
+        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list > /dev/null
+        
         sudo apt-get update
         sudo apt-get install -y google-chrome-stable
         # Install Chrome dependencies
         sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2
+        
+        # Verify Chrome installation
+        google-chrome --version || (echo "ERROR: Chrome installation failed!" && exit 1)
+        echo "✓ Chrome installed successfully"
     
     - name: Install Python dependencies
       run: |
@@ -57,6 +64,7 @@ jobs:
     - name: Run scraper
       run: |
         python scraper.py
+      continue-on-error: false
     
     - name: Cleanup
       if: always()

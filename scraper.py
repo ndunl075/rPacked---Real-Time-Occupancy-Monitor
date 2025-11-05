@@ -1,6 +1,5 @@
 import time
 import re
-import sys
 import firebase_admin
 from firebase_admin import credentials, firestore
 from selenium import webdriver
@@ -12,6 +11,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import os
+import sys
 
 # --- Firebase Setup ---
 cred_path = os.path.join(os.path.dirname(__file__), 'serviceAccountKey.json')
@@ -23,11 +23,19 @@ if not os.path.exists(cred_path):
 
 try:
     print("Initializing Firebase Admin SDK...")
-    cred = credentials.Certificate(cred_path)
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://rpacked-fd51e.firebaseio.com'
-    })
-    db = firestore.client()
+    # Check if Firebase app is already initialized (can happen in some environments)
+    try:
+        app = firebase_admin.get_app()
+        print("Firebase app already initialized, reusing existing app...")
+        db = firestore.client()
+    except ValueError:
+        # App doesn't exist, initialize it
+        print("Creating new Firebase app...")
+        cred = credentials.Certificate(cred_path)
+        firebase_admin.initialize_app(cred, {
+            'databaseURL': 'https://rpacked-fd51e.firebaseio.com'
+        })
+        db = firestore.client()
     print("✓ Firebase connection established.")
 except Exception as e:
     print(f"!!! Firebase initialization failed: {e}")
@@ -47,7 +55,7 @@ def scrape_rpac_data():
     print("=" * 60)
     print("Starting RPAC scraper...")
     print("=" * 60)
-    print(f"Attempting to scrape RPAC data using Selenium...")
+    print("Attempting to scrape RPAC data using Selenium...")
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
@@ -58,7 +66,6 @@ def scrape_rpac_data():
 
     driver = None
     success = False
-    
     try:
         print("Initializing Chrome browser driver...")
         service = ChromeService(ChromeDriverManager().install())
@@ -174,7 +181,7 @@ def scrape_rpac_data():
         
         success = True
         print(f"\n{'=' * 60}")
-        print(f"--- SUCCESS ---")
+        print("--- SUCCESS ---")
         print(f"Successfully scraped and saved {len(scraped_locations)} locations to Firestore.")
         print(f"Updated last scraped timestamp in app_metadata.")
         print(f"{'=' * 60}")

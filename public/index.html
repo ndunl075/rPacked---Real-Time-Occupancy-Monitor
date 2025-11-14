@@ -9,34 +9,411 @@
     <!-- This is an inline SVG favicon. It creates the scarlet "O" for your browser tab. -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23BB0000'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='70' font-weight='bold' fill='white' font-family='Arial, sans-serif'%3EO%3C/text%3E%3C/svg%3E">
     
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Using Inter font from Tailwind's default stack */
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #F5F5F5;
+            min-height: 100vh;
         }
+        
         /* Ohio State colors */
         :root {
             --osu-scarlet: #BB0000;
             --osu-gray: #666666;
             --osu-light-gray: #E5E5E5;
         }
+        
+        /* Container and layout */
+        .container {
+            width: 100%;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .max-w-5xl {
+            max-width: 64rem;
+        }
+        
+        /* Flexbox utilities */
+        .flex {
+            display: flex;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        /* Grid utilities */
+        .grid {
+            display: grid;
+        }
+        
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+        
+        .gap-4 {
+            gap: 1rem;
+        }
+        
+        /* Responsive grid */
+        @media (min-width: 768px) {
+            .md-grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .lg-grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+        
+        /* Responsive text - Tailwind sm: and md: breakpoints */
+        @media (min-width: 640px) {
+            .sm-text-3xl {
+                font-size: 1.875rem;
+                line-height: 2.25rem;
+            }
+            
+            .sm-text-sm {
+                font-size: 0.875rem;
+                line-height: 1.25rem;
+            }
+        }
+        
+        /* Spacing utilities */
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .py-5 {
+            padding-top: 1.25rem;
+            padding-bottom: 1.25rem;
+        }
+        
+        .py-6 {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        
+        .p-4 {
+            padding: 1rem;
+        }
+        
+        .p-5 {
+            padding: 1.25rem;
+        }
+        
+        .p-10 {
+            padding: 2.5rem;
+        }
+        
+        .px-3 {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+        
+        .py-1 {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        .mt-4 {
+            margin-top: 1rem;
+        }
+        
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .mb-3 {
+            margin-bottom: 0.75rem;
+        }
+        
+        /* Typography */
+        .text-2xl {
+            font-size: 1.5rem;
+            line-height: 2rem;
+        }
+        
+        .text-3xl {
+            font-size: 1.875rem;
+            line-height: 2.25rem;
+        }
+        
+        .text-xs {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        
+        .text-lg {
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+        }
+        
+        .font-bold {
+            font-weight: 700;
+        }
+        
+        .font-semibold {
+            font-weight: 600;
+        }
+        
+        .font-medium {
+            font-weight: 500;
+        }
+        
+        /* Text colors */
+        .text-white {
+            color: #ffffff;
+        }
+        
+        .text-gray-500 {
+            color: #6b7280;
+        }
+        
+        .text-gray-600 {
+            color: #4b5563;
+        }
+        
+        .text-gray-800 {
+            color: #1f2937;
+        }
+        
+        .text-gray-900 {
+            color: #111827;
+        }
+        
+        /* Text alignment */
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        /* Background colors */
+        .bg-white {
+            background-color: #ffffff;
+        }
+        
+        /* Opacity */
+        .opacity-80 {
+            opacity: 0.8;
+        }
+        
+        .opacity-90 {
+            opacity: 0.9;
+        }
+        
+        /* Shadows */
+        .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Border radius */
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        
+        .rounded-full {
+            border-radius: 9999px;
+        }
+        
+        /* Display */
+        .inline-block {
+            display: inline-block;
+        }
+        
+        /* Sizing */
+        .w-full {
+            width: 100%;
+        }
+        
+        .h-4 {
+            height: 1rem;
+        }
+        
+        /* Overflow */
+        .overflow-hidden {
+            overflow: hidden;
+        }
+        
+        /* Text truncation */
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Transitions */
+        .transition-all {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .transition-transform {
+            transition-property: transform;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .duration-200 {
+            transition-duration: 200ms;
+        }
+        
+        .duration-300 {
+            transition-duration: 300ms;
+        }
+        
+        .duration-500 {
+            transition-duration: 500ms;
+        }
+        
+        /* Hover effects */
+        .hover-scale-105:hover {
+            transform: scale(1.05);
+        }
+        
         /* Custom styles for the progress bar background */
         .progress-bar-bg {
-            background-color: var(--osu-light-gray); /* Ohio State light gray */
+            background-color: var(--osu-light-gray);
         }
+        
         .osu-scarlet {
             background-color: var(--osu-scarlet);
         }
+        
         .osu-scarlet-text {
             color: var(--osu-scarlet);
         }
+        
         .osu-gray-text {
             color: var(--osu-gray);
         }
+        
+        /* Animation styles */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+        
+        .card-animate {
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #E5E5E5;
+            border-top: 3px solid #BB0000;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        .shimmer {
+            background: linear-gradient(
+                90deg,
+                #F5F5F5 0%,
+                #E5E5E5 50%,
+                #F5F5F5 100%
+            );
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .number-counter {
+            transition: all 0.3s ease;
+        }
+        
+        #message-container {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        #message-container.fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        #capacity-grid {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        #capacity-grid.fade-in {
+            opacity: 1;
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen" style="background-color: #F5F5F5;">
+<body>
 
     <!-- Header -->
     <header class="shadow-md" style="background-color: #BB0000;">
@@ -44,11 +421,11 @@
             <div class="flex justify-between items-center">
                 <div>
                     <!-- === MOBILE-FRIENDLY HEADER TEXT === -->
-                    <h1 class="text-2xl sm:text-3xl font-bold text-white">rPacked</h1>
+                    <h1 class="text-2xl sm-text-3xl font-bold text-white">rPacked</h1>
                     <p class="text-sm text-white opacity-90">Ohio State University RPAC</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-xs sm:text-sm text-white">Live RPAC Capacity</p>
+                    <p class="text-xs sm-text-sm text-white">Live RPAC Capacity</p>
                     <p id="last-updated" class="text-xs text-white opacity-80">Updating...</p>
                 </div>
             </div>
@@ -60,7 +437,8 @@
         
         <!-- Loading State -->
         <div id="message-container" class="text-center p-10">
-            <p id="message-text" class="text-lg text-gray-500">Connecting to live data...</p>
+            <div class="loading-spinner"></div>
+            <p id="message-text" class="text-lg text-gray-500 mt-4">Connecting to live data...</p>
         </div>
 
         <!-- 
@@ -70,7 +448,7 @@
           'md:grid-cols-2' = 2 columns on medium screens (tablets)
           'lg:grid-cols-3' = 3 columns on large screens (desktops)
         -->
-        <div id="capacity-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div id="capacity-grid" class="grid grid-cols-1 md-grid-cols-2 lg-grid-cols-3 gap-4">
             <!-- Location cards will be injected here by JavaScript -->
         </div>
 
@@ -83,13 +461,13 @@
 
     <!-- HTML Template for a single location card -->
     <template id="location-card-template">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 card-hover">
             <div class="p-5">
                 <h2 class="text-lg font-semibold text-gray-800 truncate" data-name>Location Name</h2>
                 
                 <!-- Status Tag -->
                 <div class="mt-2 mb-3">
-                    <span data-status-tag class="px-3 py-1 rounded-full text-sm font-medium"></span>
+                    <span data-status-tag class="px-3 py-1 rounded-full text-sm font-medium inline-block transition-transform duration-200 hover-scale-105"></span>
                 </div>
 
                 <!-- Availability Text -->
@@ -142,6 +520,52 @@
         const lastUpdatedEl = document.getElementById('last-updated');
 
         /**
+         * Animate a number from 0 to target value
+         */
+        function animateNumber(element, target, duration = 500) {
+            const start = parseInt(element.textContent) || 0;
+            const increment = target > start ? 1 : -1;
+            const steps = Math.abs(target - start);
+            const stepDuration = duration / steps;
+            
+            if (steps === 0) return;
+            
+            let current = start;
+            const timer = setInterval(() => {
+                current += increment;
+                if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
+                    element.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    element.textContent = current;
+                }
+            }, stepDuration);
+        }
+
+        /**
+         * Add fade-in animation with stagger effect
+         */
+        function animateCardEntry(card, index) {
+            card.classList.add('card-animate');
+            card.style.animationDelay = `${index * 0.1}s`;
+            
+            // Remove animation class after animation completes to allow re-animation
+            setTimeout(() => {
+                card.classList.remove('card-animate');
+            }, 500 + (index * 100));
+        }
+
+        /**
+         * Pulse animation for live updates
+         */
+        function pulseElement(element) {
+            element.style.animation = 'pulse 0.5s ease-in-out';
+            setTimeout(() => {
+                element.style.animation = '';
+            }, 500);
+        }
+
+        /**
          * Renders a single location card with the new design.
          */
         function renderCapacityCard(location) {
@@ -181,8 +605,14 @@
             }
 
             // --- 2. Set Availability Text ---
-            availableCountEl.textContent = available;
+            availableCountEl.textContent = '0'; // Start at 0 for animation
+            availableCountEl.classList.add('number-counter');
             availableLabelEl.textContent = `/ ${total} AVAILABLE`;
+            
+            // Animate the number counter after a short delay
+            setTimeout(() => {
+                animateNumber(availableCountEl, available, 600);
+            }, 100);
             
             // If closed, dim the text
             if (!isOpen) {
@@ -190,9 +620,12 @@
                 availableLabelEl.classList.add('text-gray-400');
             }
 
-            // --- 3. Set Progress Bar Color & Width ---
-            progressBar.style.width = `${percentUsed}%`;
+            // --- 3. Set Progress Bar Color & Width with smooth animation ---
+            // Set width to 0 initially, then animate to target
+            progressBar.style.width = '0%';
+            progressBar.style.transition = 'width 0.8s ease-out, background-color 0.3s ease';
             
+            // Set color first
             if (!isOpen) {
                 progressBar.style.backgroundColor = '#666666'; // Ohio State gray for closed
             } else if (percentUsed < 50) {
@@ -202,6 +635,11 @@
             } else {
                 progressBar.style.backgroundColor = '#8B0000'; // Dark scarlet for packed
             }
+            
+            // Animate width after a short delay to allow color to set
+            setTimeout(() => {
+                progressBar.style.width = `${percentUsed}%`;
+            }, 50);
 
             return card;
         }
@@ -224,29 +662,71 @@
                     throw new Error("Could not authenticate with database.");
                 }
 
-                // --- This is the REAL-TIME LISTENER ---
+                // --- This is the REAL-TIME LISTENER for capacity data ---
                 const docRef = doc(db, "live_counts", "RPAC");
                 
+                // --- This is the REAL-TIME LISTENER for last scraped timestamp ---
+                const lastScrapedRef = doc(db, "app_metadata", "last_scraped");
+                
+                let previousUpdateTime = null;
+                let isFirstLoad = true;
+                
+                // Listen to last scraped timestamp updates
+                onSnapshot(lastScrapedRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.data();
+                        if (data.timestamp) {
+                            const serverTime = data.timestamp.toDate();
+                            const timeString = serverTime.toLocaleTimeString();
+                            
+                            // Only pulse if this is a new update (not initial load)
+                            if (previousUpdateTime && previousUpdateTime !== timeString) {
+                                pulseElement(lastUpdatedEl);
+                            }
+                            
+                            lastUpdatedEl.textContent = `Last Scrape: ${timeString}`;
+                            previousUpdateTime = timeString;
+                        }
+                    } else {
+                        // Document doesn't exist yet - scraper hasn't run
+                        lastUpdatedEl.textContent = 'Waiting for first scrape...';
+                    }
+                }, (error) => {
+                    console.error("Error listening to last scraped timestamp:", error);
+                    lastUpdatedEl.textContent = 'Unable to load timestamp';
+                });
+                
+                // Listen to capacity data updates
                 onSnapshot(docRef, (doc) => {
-                    messageContainer.style.display = 'none'; // Hide "Connecting..."
+                    // Smoothly fade out loading message
+                    if (messageContainer.style.display !== 'none') {
+                        messageContainer.classList.add('fade-out');
+                        setTimeout(() => {
+                            messageContainer.style.display = 'none';
+                        }, 300);
+                    }
+                    
                     grid.innerHTML = ''; // Clear old data
 
                     if (doc.exists()) {
+                        // Fade in grid on first load
+                        if (isFirstLoad) {
+                            grid.classList.add('fade-in');
+                            isFirstLoad = false;
+                        }
                         const data = doc.data();
                         const locations = data.locations || [];
                         
                         // Sort locations alphabetically by name
                         locations.sort((a, b) => a.name.localeCompare(b.name));
 
-                        // Render a card for each location
-                        locations.forEach(location => {
+                        // Render a card for each location with stagger animation
+                        locations.forEach((location, index) => {
                             const card = renderCapacityCard(location);
                             grid.appendChild(card);
+                            // Add stagger animation
+                            animateCardEntry(card, index);
                         });
-
-                        // Update last updated timestamp
-                        const serverTime = data.last_updated ? data.last_updated.toDate() : new Date();
-                        lastUpdatedEl.textContent = `Last Scrape: ${serverTime.toLocaleTimeString()}`;
 
                     } else {
                         // Document doesn't exist

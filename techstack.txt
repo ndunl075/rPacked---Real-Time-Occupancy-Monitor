@@ -1,0 +1,35 @@
+Backend & Automation
+Python: Used as the core language for web scraping and backend logic.
+
+Selenium: Used to automate a "headless" Chrome browser, allowing the script to read data from a dynamic, JavaScript-heavy website.
+
+BeautifulSoup4: Used to parse the raw HTML from Selenium and extract the specific capacity numbers.
+
+Firebase Admin SDK (Python): A secure, backend-only library used to authenticate with a serviceAccountKey.json and write the scraped data directly into the database.
+
+Frontend
+HTML5: Used for the structure of the web page.
+
+Tailwind CSS: A utility-first CSS framework used for all styling and to create the responsive, mobile-first design.
+
+JavaScript (ES6+): Used to connect to Firebase, handle authentication, and dynamically render the capacity cards on the page.
+
+Firebase JS SDK: The client-side library used to connect to the Firebase project and (most importantly) attach a real-time onSnapshot listener to the database.
+
+Database
+Google Firestore: A NoSQL, real-time cloud database used to store the live capacity data from the scraper and serve it instantly to all connected users.
+
+Platform & DevOps (Deployment and Automation)
+GitHub Actions: Used as a CI/CD tool to run the Python scraper on an automated schedule (cron job), ensuring the data is fresh 24/7.
+
+GitHub Secrets: Used to securely store the private serviceAccountKey.json for the automated script, keeping it safe and out of the public repository.
+
+Git: Used for version control and to manage the public repository.
+
+Firebase Platform (BaaS): The core "Backend-as-a-Service" used for:
+
+Firebase Authentication (to secure the database with anonymous sign-in).
+
+Firestore Security Rules (to protect the database).
+
+Netlify / Firebase Hosting: Used to deploy and host the static frontend web application for the public.

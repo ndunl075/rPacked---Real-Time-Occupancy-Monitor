@@ -1,0 +1,41 @@
+🚀 Excited to share rPacked - my latest full-stack project that solves a real problem for Ohio State students!
+
+As a Buckeye, I've always wanted to check how busy the RPAC gym is before heading over. So I built a real-time capacity tracker that automatically scrapes and displays live occupancy data across all 15+ locations.
+
+✨ **What it does:**
+• Automatically scrapes RPAC capacity data every 15 minutes via GitHub Actions
+• Real-time updates using Firebase Firestore listeners
+• Beautiful, mobile-responsive dashboard with Ohio State branding
+• Shows open/closed status, available spots, and visual progress bars
+• Live "last scraped" timestamp that updates automatically
+
+🔧 **Technical Stack:**
+**Backend & Automation:**
+• Python with Selenium for dynamic web scraping
+• BeautifulSoup4 for HTML parsing
+• Firebase Admin SDK for secure database writes
+• GitHub Actions for automated CI/CD (runs every 15 minutes)
+
+**Frontend:**
+• Vanilla JavaScript with ES6+ modules
+• Custom CSS (zero framework dependencies)
+• Firebase JS SDK for real-time data synchronization
+• Smooth animations and transitions
+
+**Infrastructure:**
+• Firebase Firestore for real-time NoSQL database
+• Firebase Hosting for static site deployment
+• GitHub Actions for serverless automation
+
+🎯 **Key Learnings:**
+• Web scraping dynamic, JavaScript-rendered content with Selenium
+• Real-time database synchronization with Firebase listeners
+• Serverless automation and CI/CD pipelines
+• Building production-ready full-stack applications
+• Error handling and robust logging for automated systems
+
+This project demonstrates full-stack development skills, automation expertise, and problem-solving - turning a daily frustration into a useful tool for the OSU community!
+
+Check it out: https://rpacked.netlify.app
+
+#WebDevelopment #Python #JavaScript #Firebase #FullStackDevelopment #WebScraping #Automation #CI/CD #GitHubActions #OhioState #StudentProjects #TechProjects #SoftwareEngineering

@@ -99,6 +99,8 @@ def scrape_facility_data(facility_name, facility_url, driver):
                     print("Debug: Found container but no name_element. Skipping.")
                     continue
                 name = name_element.text.strip()
+                # Clean up trailing dashes and spaces (e.g., "Tennis Courts - " -> "Tennis Courts")
+                name = re.sub(r'[\s-]+$', '', name)
 
                 # --- NEW: Get Open/Closed Status ---
                 status_element = location.find('span', class_=STATUS_CLASS)

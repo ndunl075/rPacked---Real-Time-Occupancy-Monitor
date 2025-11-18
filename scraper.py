@@ -45,53 +45,38 @@ except Exception as e:
     sys.exit(1)
 
 # --- Scraper Configuration ---
-RPAC_URL = 'https://recsports.osu.edu/facilities/recreation-and-physical-activity-center-rpac'
+FACILITIES = {
+    'RPAC': 'https://recsports.osu.edu/facilities/recreation-and-physical-activity-center-rpac',
+    'JOS': 'https://recsports.osu.edu/fms/facilities/jos',
+    'JON': 'https://recsports.osu.edu/fms/facilities/jon',
+    'NRC': 'https://recsports.osu.edu/fms/facilities/nrc'
+}
+
 CONTAINER_CLASS = 'c-meter'             # The main div for one location
 NAME_CLASS = 'c-meter__title'           # The class for the location name
 STATUS_CLASS = 'c-meter__status'        # The class for the "Open / Last updated..." text
 COUNT_METER_SELECTOR = 'meter.c-meter__meter' # The <meter> tag that holds the count
 
-def scrape_rpac_data():
-    print("=" * 60)
-    print("Starting RPAC scraper...")
-    print("=" * 60)
-    print("Attempting to scrape RPAC data using Selenium...")
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--log-level=3')
-    options.add_experimental_option('excludeSwitches', ['enable-logging'])
-
-    driver = None
-    success = False
+def scrape_facility_data(facility_name, facility_url, driver):
+    """Scrape a single facility's capacity data."""
+    print(f"\n{'=' * 60}")
+    print(f"Scraping {facility_name}...")
+    print(f"{'=' * 60}")
+    print(f"Loading page: {facility_url} ...")
+    
     try:
-        print("Initializing Chrome browser driver...")
-        # Try to find Chrome binary (works with both Chrome and Chromium)
-        import shutil
-        chrome_binary = None
-        for binary_name in ['google-chrome', 'chromium-browser', 'chromium', 'chrome']:
-            chrome_path = shutil.which(binary_name)
-            if chrome_path:
-                chrome_binary = chrome_path
-                print(f"Found browser binary: {chrome_binary}")
-                options.binary_location = chrome_binary
-                break
-        
-        service = ChromeService(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=options)
-        print("✓ Chrome driver initialized.")
-        
-        print(f"Loading page: {RPAC_URL} ...")
-        driver.get(RPAC_URL)
+        driver.get(facility_url)
         print("✓ Page loaded.")
         
         print(f"Waiting for JavaScript to load live data (class: '{CONTAINER_CLASS}')...")
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CLASS_NAME, CONTAINER_CLASS))
-        )
-        print("✓ Live data found!")
+        try:
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_element_located((By.CLASS_NAME, CONTAINER_CLASS))
+            )
+            print("✓ Live data found!")
+        except TimeoutException:
+            print(f"⚠️ WARNING: No capacity meters found on {facility_name} page. This facility may not have capacity tracking.")
+            return None
         
         print("Grabbing page source...")
         time.sleep(0.5) 
@@ -102,8 +87,8 @@ def scrape_rpac_data():
         print(f"Found {len(locations)} location containers.")
         
         if not locations:
-            print("!!! SCRAPER FAILED: Found no elements with class 'c-meter'.")
-            sys.exit(1)
+            print(f"⚠️ WARNING: No locations found on {facility_name} page. Skipping.")
+            return None
 
         scraped_locations = []
         
@@ -156,54 +141,103 @@ def scrape_rpac_data():
                 traceback.print_exc()
 
         if not scraped_locations:
-            print("!!! SCRAPER FAILED: Parsed 0 locations successfully.")
-            sys.exit(1)
+            print(f"⚠️ WARNING: Parsed 0 locations successfully for {facility_name}. Skipping.")
+            return None
 
-        print(f"\nSuccessfully parsed {len(scraped_locations)} locations.")
-        print("Writing to Firestore...")
-
+        print(f"✓ Successfully parsed {len(scraped_locations)} locations from {facility_name}.")
+        
         # --- Save to Firebase ---
         try:
-            doc_ref = db.collection('live_counts').document('RPAC')
+            doc_ref = db.collection('live_counts').document(facility_name)
             doc_ref.set({
                 'locations': scraped_locations,
-                'last_updated': firestore.SERVER_TIMESTAMP
+                'last_updated': firestore.SERVER_TIMESTAMP,
+                'facility_name': facility_name
             })
-            print("✓ Wrote to live_counts/RPAC")
+            print(f"✓ Wrote to live_counts/{facility_name}")
+            return len(scraped_locations)
         except Exception as e:
-            print(f"!!! ERROR writing to live_counts/RPAC: {e}")
+            print(f"!!! ERROR writing to live_counts/{facility_name}: {e}")
             import traceback
             traceback.print_exc()
-            sys.exit(1)
+            return None
         
-        # --- Also update the last scraped timestamp in app_metadata ---
+    except Exception as e:
+        print(f"\n!!! ERROR scraping {facility_name}: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+def main():
+    """Main function to scrape all facilities."""
+    print("=" * 60)
+    print("Starting OSU Rec Sports Capacity Scraper")
+    print("=" * 60)
+    print(f"Facilities to scrape: {', '.join(FACILITIES.keys())}")
+    
+    # Initialize browser once for all facilities
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--log-level=3')
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+
+    driver = None
+    total_locations = 0
+    successful_facilities = []
+    
+    try:
+        print("\nInitializing Chrome browser driver...")
+        # Try to find Chrome binary (works with both Chrome and Chromium)
+        import shutil
+        chrome_binary = None
+        for binary_name in ['google-chrome', 'chromium-browser', 'chromium', 'chrome']:
+            chrome_path = shutil.which(binary_name)
+            if chrome_path:
+                chrome_binary = chrome_path
+                print(f"Found browser binary: {chrome_binary}")
+                options.binary_location = chrome_binary
+                break
+        
+        service = ChromeService(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
+        print("✓ Chrome driver initialized.")
+        
+        # Scrape each facility
+        for facility_name, facility_url in FACILITIES.items():
+            location_count = scrape_facility_data(facility_name, facility_url, driver)
+            if location_count:
+                total_locations += location_count
+                successful_facilities.append(facility_name)
+        
+        # Update the last scraped timestamp in app_metadata
         try:
             last_scraped_ref = db.collection('app_metadata').document('last_scraped')
             last_scraped_ref.set({
                 'timestamp': firestore.SERVER_TIMESTAMP,
-                'locations_count': len(scraped_locations)
+                'total_locations_count': total_locations,
+                'facilities_scraped': successful_facilities,
+                'facilities_count': len(successful_facilities)
             })
-            print("✓ Wrote to app_metadata/last_scraped")
+            print(f"\n✓ Wrote to app_metadata/last_scraped")
         except Exception as e:
-            print(f"!!! ERROR writing to app_metadata/last_scraped: {e}")
+            print(f"\n!!! ERROR writing to app_metadata/last_scraped: {e}")
             import traceback
             traceback.print_exc()
-            sys.exit(1)
         
-        success = True
         print(f"\n{'=' * 60}")
         print("--- SUCCESS ---")
-        print(f"Successfully scraped and saved {len(scraped_locations)} locations to Firestore.")
+        print(f"Successfully scraped {len(successful_facilities)} facility/facilities: {', '.join(successful_facilities)}")
+        print(f"Total locations scraped: {total_locations}")
         print(f"Updated last scraped timestamp in app_metadata.")
         print(f"{'=' * 60}")
-
-    except TimeoutException:
-        print(f"\n{'=' * 60}")
-        print("--- ERROR: TIMEOUT ---")
-        print(f"The page loaded, but the element with class '{CONTAINER_CLASS}' did not appear after 15 seconds.")
-        print(f"{'=' * 60}")
-        sys.exit(1)
         
+        if not successful_facilities:
+            print("\n!!! WARNING: No facilities were successfully scraped!")
+            sys.exit(1)
+
     except Exception as e:
         print(f"\n{'=' * 60}")
         print("--- ERROR: An unexpected error occurred ---")
@@ -215,18 +249,14 @@ def scrape_rpac_data():
 
     finally:
         if driver:
-            print("Shutting down browser...")
+            print("\nShutting down browser...")
             driver.quit()
             print("✓ Browser closed.")
-        
-        if not success:
-            print("\n!!! Scraper did not complete successfully!")
-            sys.exit(1)
 
 # --- Run the scraper ---
 if __name__ == "__main__":
     try:
-        scrape_rpac_data()
+        main()
         print("\n✓ Scraper completed successfully!")
         sys.exit(0)
     except KeyboardInterrupt:

@@ -454,9 +454,11 @@
             padding: 0.75rem 2.75rem 0.75rem 1.125rem;
             border-radius: 0.625rem;
             border: 1.5px solid rgba(255, 255, 255, 0.5);
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background-color: #ffffff;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%234b5563' d='M7 10L2 5h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.875rem center;
+            background-size: 14px;
             color: #1f2937;
             font-size: 0.875rem;
             font-weight: 500;
@@ -466,21 +468,18 @@
             width: 100%;
             max-width: 400px;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%234b5563' d='M7 10L2 5h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.875rem center;
-            background-size: 14px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
         }
         
         .facility-select:hover {
-            background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.98) 100%);
+            background-color: #ffffff;
             border-color: rgba(255, 255, 255, 0.8);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
             transform: translateY(-1px);
         }
         
         .facility-select:active {
+            background-color: #ffffff;
             transform: translateY(0);
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
         }
@@ -488,7 +487,7 @@
         .facility-select:focus {
             outline: none;
             border-color: #ffffff;
-            background: #ffffff;
+            background-color: #ffffff;
             box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
         }
         

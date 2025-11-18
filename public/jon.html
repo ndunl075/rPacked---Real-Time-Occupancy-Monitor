@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
     <title>rPacked - Live JON Capacity | Ohio State</title>
     
     <!-- === NEW FAVICON === -->
@@ -21,6 +24,13 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
             background-color: #F5F5F5;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* Prevent text size adjustment on iOS */
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            /* Improve touch scrolling */
+            -webkit-overflow-scrolling: touch;
         }
         
         /* Ohio State colors */
@@ -35,6 +45,14 @@
             width: 100%;
             padding-left: 1rem;
             padding-right: 1rem;
+        }
+        
+        /* Mobile-first: Reduce padding on small screens */
+        @media (max-width: 640px) {
+            .container {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
         }
         
         .mx-auto {
@@ -70,6 +88,13 @@
         
         .gap-4 {
             gap: 1rem;
+        }
+        
+        /* Mobile: Reduce gap for better space utilization */
+        @media (max-width: 640px) {
+            .gap-4 {
+                gap: 0.75rem;
+            }
         }
         
         /* Responsive grid */
@@ -444,6 +469,104 @@
             outline: none;
             border-color: #ffffff;
             box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 640px) {
+            /* Ensure touch targets are at least 44x44px */
+            .facility-select {
+                min-height: 44px;
+                font-size: 1rem; /* Prevent iOS zoom on focus */
+                padding: 0.75rem 1rem;
+            }
+            
+            /* Stack header on mobile */
+            header .flex {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            
+            header .text-right {
+                text-align: left;
+                width: 100%;
+            }
+            
+            /* Better card padding on mobile */
+            .p-5 {
+                padding: 1rem;
+            }
+            
+            /* Optimize text sizes for mobile readability */
+            .text-3xl {
+                font-size: 2rem;
+                line-height: 2.5rem;
+            }
+            
+            .text-lg {
+                font-size: 1.25rem;
+                line-height: 1.75rem;
+            }
+            
+            /* Better spacing for status tags */
+            .px-3 {
+                padding-left: 0.875rem;
+                padding-right: 0.875rem;
+            }
+            
+            .py-1 {
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+            
+            /* Improve main content padding */
+            main.p-4 {
+                padding: 0.75rem;
+            }
+            
+            /* Better footer spacing */
+            footer.py-6 {
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+        }
+        
+        /* Tablet optimizations */
+        @media (min-width: 641px) and (max-width: 1023px) {
+            .facility-select {
+                min-height: 44px;
+            }
+        }
+        
+        /* Touch-friendly interactions */
+        @media (hover: none) and (pointer: coarse) {
+            /* Remove hover effects on touch devices */
+            .card-hover:hover {
+                transform: none;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            
+            /* Add active state for touch feedback */
+            .card-hover:active {
+                transform: scale(0.98);
+                box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+            }
+        }
+        
+        /* Prevent text selection on UI elements for better mobile UX */
+        header, .facility-select, [data-status-tag] {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Allow text selection in cards for accessibility */
+        .bg-white {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
     </style>
 </head>
